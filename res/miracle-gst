@@ -1,5 +1,14 @@
 #!/bin/bash
 
+audiosink="alsasink device=hw:1,0"
+outfile=/data/gstreamer.out
+debug_level=3
+
+export GST_DEBUG="*:$debug_level,rtpjitterbuffer:1,h264parse:4,videodecoder:4,video-info:6,imxvpudecoder:4,rtpbasedepayload:4"
+echo "$0 starting up with arguments $*" >> ${outfile}.init
+export GST_DEBUG_FILE=$outfile
+export GST_DEBUG_NO_COLOR=1
+
 function help {
    local scriptname="$(basename $0)"
    cat >&2 <<EOF
@@ -69,12 +78,7 @@ while getopts "r:d:as:p:h" optname
     esac
   done
 
-RUN="/usr/bin/gst-launch-1.0 -v "
-if [ $DEBUG != '0' ]
-then
-  RUN+="--gst-debug=${DEBUG} "
-fi
-
+RUN="/usr/bin/gst-launch-1.0 "
 RUN+="udpsrc port=$PORT caps=\"application/x-rtp, media=video\" ! rtpjitterbuffer latency=100 ! rtpmp2tdepay ! tsdemux "
 
 if [ $AUDIO == '1' ]
@@ -82,19 +86,20 @@ then
   RUN+="name=demuxer demuxer. "
 fi
 
-RUN+="! queue max-size-buffers=0 max-size-time=0 ! h264parse ! avdec_h264 ! videoconvert ! "
+RUN+="! queue max-size-buffers=0 max-size-time=0 ! h264parse ! imxvpudec ! videoconvert ! "
 
 if [ $SCALE == '1' ]
 then
   RUN+="videoscale method=1 ! video/x-raw,width=${WIDTH},height=${HEIGHT} ! "
 fi
 
-RUN+="autovideosink "
+RUN+="imxipuvideosink "
 
 if [ $AUDIO == '1' ]
 then
-  RUN+="demuxer. ! queue max-size-buffers=0 max-size-time=0 ! aacparse ! avdec_aac ! audioconvert ! audioresample ! autoaudiosink "
+  RUN+="demuxer. ! queue max-size-buffers=0 max-size-time=0 ! aacparse ! avdec_aac ! audioconvert ! audioresample ! $audiosink" 2>&1 > /data/gstreamer.out
 fi
 
 echo "running: $RUN"
+echo "$0 running ${RUN}" >> ${outfile}.init
 exec ${RUN}
