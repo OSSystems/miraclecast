@@ -93,7 +93,7 @@ then
   RUN+="videoscale method=1 ! video/x-raw,width=${WIDTH},height=${HEIGHT} ! "
 fi
 
-RUN+="imxipuvideosink "
+RUN+="imxipuvideosink framebuffer=/dev/fb1 "
 
 if [ $AUDIO == '1' ]
 then
@@ -101,5 +101,8 @@ then
 fi
 
 echo "running: $RUN"
+fbset -fb /dev/fb1 -xres 1280 -yres 720
+echo 0 > /sys/class/graphics/fb1/blank
+echo BGR24 > /sys/class/graphics/fb1/fsl_disp_fb_format
 echo "$0 running ${RUN}" >> ${outfile}.init
 exec ${RUN}
