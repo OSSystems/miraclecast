@@ -105,5 +105,6 @@ fbset -fb /dev/fb1 -xres 1280 -yres 720
 echo 1280,2160 > /sys/class/graphics/fb1/virtual_size
 echo 0 > /sys/class/graphics/fb1/blank
 echo BGR24 > /sys/class/graphics/fb1/fsl_disp_fb_format
+enable-fb1 &
 echo "$0 running ${RUN}" >> ${outfile}.init
 exec ${RUN}

@@ -1,0 +1,3 @@
+#!/bin/sh
+usleep 500000
+devregs 0x02618004 0
