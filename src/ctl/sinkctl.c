@@ -28,6 +28,7 @@
 #include <strings.h>
 #include <sys/signalfd.h>
 #include <sys/time.h>
+#include <sys/wait.h>
 #include <systemd/sd-bus.h>
 #include <systemd/sd-event.h>
 #include <systemd/sd-journal.h>
@@ -619,8 +620,16 @@ void ctl_fn_peer_connected(struct ctl_peer *p)
 	}
 }
 
+#define DISCONNECT_SCRIPT "/usr/bin/miracle-disconnect"
+static char *const disconnect_args[] = {
+	DISCONNECT_SCRIPT,
+	0
+};
+
 void ctl_fn_peer_disconnected(struct ctl_peer *p)
 {
+	pid_t pid;
+	int stat;
 	if (p->l != running_link || shl_isempty(p->wfd_subelements))
 		return;
 
@@ -638,6 +647,12 @@ void ctl_fn_peer_disconnected(struct ctl_peer *p)
 	if (cli_running())
 		cli_printf("[" CLI_YELLOW "DISCONNECT" CLI_DEFAULT "] Peer: %s\n",
 			   p->label);
+
+	if ((pid = fork()) == 0) {
+		execvp(DISCONNECT_SCRIPT, disconnect_args);
+	} else {
+		waitpid(pid, &stat, 0);
+	}
 }
 
 void ctl_fn_link_new(struct ctl_link *l)
