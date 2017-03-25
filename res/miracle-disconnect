@@ -1,0 +1,3 @@
+#!/bin/sh
+echo 1 > /sys/class/graphics/fb1/blank
+echo "miraclecast disconnected"
