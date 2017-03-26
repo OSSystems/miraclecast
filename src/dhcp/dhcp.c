@@ -68,7 +68,7 @@
 #include "config.h"
 
 static const char *arg_netdev;
-static const char *arg_ip_binary = "/bin/ip";
+static const char *arg_ip_binary = "/sbin/ip";
 static bool arg_server;
 static char arg_local[INET_ADDRSTRLEN];
 static char arg_gateway[INET_ADDRSTRLEN];
@@ -749,7 +749,7 @@ static int help(void)
 	       "     --log-time             Prefix log-messages with timestamp\n"
 	       "\n"
 	       "     --netdev <dev>         Network device to run on\n"
-	       "     --ip-binary <path>     Path to 'ip' binary [default: /bin/ip]\n"
+	       "     --ip-binary <path>     Path to 'ip' binary [default: /sbin/ip]\n"
 	       "     --comm-fd <int>        Comm-socket FD passed through execve()\n"
 	       "\n"
 	       "Server Options:\n"
